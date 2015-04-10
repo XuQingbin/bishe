@@ -27,7 +27,7 @@ def close_conn(conn):
     conn.close()
 
 def get_bnos(conn):
-    sql = 'select id,book_no from %s'%TAB
+    sql = 'select id,book_no,url from %s'%TAB
     rows = conn.fetch(sql)
     return rows
 
@@ -41,13 +41,32 @@ def get_html(url):
         time.sleep(10)
         return None
 
-def parse_html(bno):
-    pass
+def parse_html(html):
+    root = etree.HTML(html)
+    main = root.xpath("//div[@class='main']/div[@class='bi3Top']/div[@class='bi3TopLeft']/div[@class='info4']")[0]
+    div1 = main.xpath('./div[1]')[0]
+    isbnplus = div1.xpath('string(.)')
+
+    author = main.xpath('./div[2]/a[1]/text()')[0]
+    press = main.xpath('./div[2]/a[2]/text()')[0]
+
+    div3 = main.xpath('./div[3]')[0]
+    bookmore = div3.xpath('string(.)')
+
+    print isbnplus
+    print author
+    print press
+    print bookmore
+    print '----------------'
+
+    #print main[0].tag
+    #print main[0]
 
 
 if __name__ == '__main__':
     conn = get_conn()
     bnos = get_bnos(conn)
     for bno in bnos:
-        print bno
+        html = get_html(bno[2])
+        parse_html(html)
     close_conn(conn)
